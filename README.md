@@ -4,4 +4,4 @@
 - Genera nombres creativos basados en la descripción de tu idea de negocio.
 - Verifica automáticamente si el dominio .com está disponible.
 
-*Con Nombralo, puedes centrarte en lo que importa:* lanzar tu producto al mundo con un nombre memorable y único.
+**Con Nombralo, puedes centrarte en lo que importa:** lanzar tu producto al mundo con un nombre memorable y único.
