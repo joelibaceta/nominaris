@@ -1,5 +1,5 @@
-# nominaen
-¿Buscas el nombre perfecto para tu negocio? **Nominaen** es una herramienta rápida y sencilla que: 
+# nominaris
+¿Buscas el nombre perfecto para tu negocio? **nominaris** es una herramienta rápida y sencilla que: 
 
 - Genera nombres creativos basados en la descripción de tu idea de negocio.
 - Verifica automáticamente si el dominio .com está disponible.
