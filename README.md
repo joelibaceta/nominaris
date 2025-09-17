@@ -1,4 +1,6 @@
-# nominaris
+![banner](figures/banner.png)
+
+
 ¿Buscas el nombre perfecto para tu negocio? **nominaris** es una herramienta rápida y sencilla que: 
 
 - Genera nombres creativos basados en la descripción de tu idea de negocio.
