@@ -1,0 +1,9 @@
+# Entrenamiento del tiny-LM (Python 3.10+). Instalar en un venv:
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r tools/train/requirements.txt
+torch>=2.2
+transformers>=4.44
+tokenizers>=0.19
+datasets>=2.20
+optimum[onnxruntime]>=1.21
+onnx>=1.16

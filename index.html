@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nominaris — tu idea en un tweet, el nombre resuelto</title>
+    <meta name="description" content="Escribe tu idea como un tweet y recibe nombres con el .com libre. Todo en tu navegador, sin backend." />
+    <style>
+      :root {
+        --bg: #08090d; --fg: #eceef4; --muted: #868ea3; --faint: #565d70;
+        --card: #10121a; --line: #1e2230; --line2: #2a2f40;
+        --a1: #34d399; --a2: #22d3ee; --accent: #34d399;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg); color: var(--fg);
+        -webkit-font-smoothing: antialiased; line-height: 1.5;
+        background-image:
+          radial-gradient(60rem 40rem at 50% -10rem, rgba(52,211,153,.10), transparent 60%),
+          radial-gradient(50rem 30rem at 90% 10rem, rgba(34,211,238,.07), transparent 60%);
+        background-repeat: no-repeat;
+      }
+      main { max-width: 660px; margin: 0 auto; padding: 40px 20px 100px; }
+
+      /* Hero */
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-size: 12.5px; font-weight: 600; letter-spacing: .01em;
+        color: var(--a1); background: rgba(52,211,153,.08);
+        border: 1px solid rgba(52,211,153,.20); padding: 6px 12px; border-radius: 999px;
+      }
+      h1 {
+        font-size: clamp(30px, 6vw, 46px); line-height: 1.08; letter-spacing: -0.03em;
+        margin: 20px 0 0; font-weight: 700;
+      }
+      h1 .grad {
+        background: linear-gradient(100deg, var(--a1), var(--a2));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .subhead { font-size: 18px; font-weight: 500; line-height: 1.4; color: #b9c0cf;
+        margin: 14px 0 0; max-width: 33em; }
+      .subhead .grad { background: linear-gradient(100deg, var(--a1), var(--a2));
+        -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 600; }
+      .lede { color: var(--muted); font-size: 16px; margin: 14px 0 0; max-width: 34em; }
+      .lede strong { color: var(--fg); font-weight: 600; }
+
+      /* Composer (estilo tweet) */
+      .composer {
+        margin-top: 30px; background: var(--card);
+        border: 1px solid var(--line); border-radius: 18px; padding: 6px;
+        box-shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 20px 50px -30px rgba(0,0,0,.8);
+      }
+      .composer-inner { padding: 16px 16px 12px; }
+      textarea#idea {
+        width: 100%; border: 0; outline: 0; resize: none; background: transparent;
+        color: var(--fg); font: inherit; font-size: 19px; line-height: 1.45;
+        min-height: 84px;
+      }
+      textarea#idea::placeholder { color: var(--faint); }
+      .composer-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 10px 12px 12px; border-top: 1px solid var(--line);
+      }
+      #count { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+      #count.warn { color: #f59e0b; }
+      button#go {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(100deg, var(--a1), var(--a2)); color: #052014;
+        border: 0; border-radius: 12px; padding: 11px 20px;
+        font-size: 15px; font-weight: 700; cursor: pointer;
+        transition: transform .08s ease, filter .15s ease, opacity .15s ease;
+      }
+      button#go:hover { filter: brightness(1.06); }
+      button#go:active { transform: translateY(1px); }
+      button#go:disabled { opacity: .55; cursor: default; filter: saturate(.6); }
+
+      /* Pills de confianza */
+      .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+      .pill {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-size: 12.5px; color: var(--muted); background: rgba(255,255,255,.03);
+        border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px;
+      }
+      .pill b { color: var(--fg); font-weight: 600; }
+      .pill .ic { color: var(--a1); }
+
+      /* Iconos SVG inline (estilo Lucide, sin dependencias) */
+      .ic { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor;
+        stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .eyebrow .ic, button#go .ic { width: 15px; height: 15px; }
+
+      /* Estado + resultados */
+      .reaction { font-size: 17px; font-weight: 600; color: var(--fg); line-height: 1.4; margin: 26px 2px 0; }
+      .reaction:empty { display: none; }
+      .reaction .grad { background: linear-gradient(100deg, var(--a1), var(--a2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .reaction strong { color: var(--fg); }
+      #status { display: block; min-height: 16px; margin: 8px 2px 0; font-size: 13.5px; color: var(--muted); }
+      ul#results {
+        list-style: none; padding: 0; margin: 14px 0 0;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      }
+      @media (max-width: 520px) { ul#results { grid-template-columns: 1fr; } }
+      ul#results li {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+        padding: 13px 15px; animation: pop .25s ease both;
+      }
+      ul#results li:hover { border-color: var(--line2); }
+      @keyframes pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+      .name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; display: block; }
+      .domain { font-size: 12.5px; color: var(--faint); }
+      a.buy {
+        color: var(--a1); text-decoration: none; font-size: 13px; font-weight: 600;
+        white-space: nowrap; opacity: .85;
+      }
+      a.buy:hover { opacity: 1; }
+
+      /* Cómo funciona */
+      .how { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 28px; }
+      .how h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--faint); margin: 0 0 18px; font-weight: 700; }
+      .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+      .step .n { color: var(--a1); font-weight: 700; font-size: 14px; }
+      .step h3 { margin: 6px 0 4px; font-size: 15px; }
+      .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+      footer { margin-top: 48px; font-size: 12.5px; color: var(--faint); text-align: center; }
+      footer .grad { background: linear-gradient(100deg, var(--a1), var(--a2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; }
+
+      /* GitHub corner ribbon */
+      .github-corner { position: fixed; top: 0; right: 0; z-index: 20; }
+      .github-corner svg { fill: var(--a1); color: var(--bg); width: 76px; height: 76px; }
+      .github-corner:hover .octo-arm { animation: octo-wave 560ms ease-in-out; }
+      @keyframes octo-wave { 0%,100% { transform: rotate(0) } 20%,60% { transform: rotate(-25deg) } 40%,80% { transform: rotate(10deg) } }
+      @media (max-width: 520px) {
+        .github-corner svg { width: 62px; height: 62px; }
+        .github-corner:hover .octo-arm { animation: none }
+        .github-corner .octo-arm { animation: octo-wave 560ms ease-in-out }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="https://github.com/joelibaceta/nominaris" class="github-corner" aria-label="Ver el código en GitHub" target="_blank" rel="noopener">
+      <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin:130px 106px" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+      </svg>
+    </a>
+    <main>
+      <span class="eyebrow">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+        del tweet al nombre · sin backend
+      </span>
+
+      <h1>A todos se nos ocurren grandes ideas.</h1>
+      <p class="subhead">Pero dar con el nombre correcto —y que su <span class="grad">dominio .com esté libre</span>— suele ser el primer paso, y el más duro.</p>
+      <p class="lede">
+        Escribe tu idea como un <strong>tweet</strong> y recibe nombres al instante.
+        Sin servidores, sin cuentas — una <strong>IA diminuta que cabe entera en tu navegador</strong>.
+      </p>
+
+      <div class="composer">
+        <div class="composer-inner">
+          <textarea id="idea" maxlength="280" placeholder="Ej: una app para reservar canchas de fútbol entre amigos, rápida y social"></textarea>
+        </div>
+        <div class="composer-bar">
+          <span id="count">0 / 280</span>
+          <button id="go">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+            <span id="golabel">Encontrar nombres</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="pills">
+        <span class="pill">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+          <b>Al instante</b>
+        </span>
+        <span class="pill">
+          <svg class="ic" viewBox="0 0 24 24"><path d="m2 2 20 20"/><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"/><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"/></svg>
+          <b>Sin backend</b> · sin cuentas
+        </span>
+        <span class="pill">
+          <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          <b>.com libre</b> · verificado en vivo
+        </span>
+        <span class="pill">
+          <svg class="ic" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+          <b>IA de ~12 MB</b>
+        </span>
+      </div>
+
+      <p id="reaction" class="reaction"></p>
+      <span id="status"></span>
+      <ul id="results"></ul>
+
+      <section class="how">
+        <h2>Cómo funciona</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="n">01</div>
+            <h3>Plasma tu idea</h3>
+            <p>Descríbela en una frase, como si la tuitearas.</p>
+          </div>
+          <div class="step">
+            <div class="n">02</div>
+            <h3>Una IA de bolsillo</h3>
+            <p>Tan pequeña que <b>cabe en tu navegador</b>.</p>
+          </div>
+          <div class="step">
+            <div class="n">03</div>
+            <h3>Solo los que puedes registrar</h3>
+            <p>Verificamos el <b>.com</b> en vivo y mostramos únicamente los libres.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>hecho con obsesión · <span class="grad">nominaris</span> · 100% en el cliente</footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

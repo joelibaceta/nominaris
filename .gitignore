@@ -1,0 +1,12 @@
+node_modules
+dist
+*.local
+.DS_Store
+
+# artefactos generados del pipeline tiny-LM
+data/dataset*.jsonl
+tools/train/out/
+tools/train/corpus.txt
+tools/train/.venv/
+__pycache__/
+public/model/onnx/model.onnx
